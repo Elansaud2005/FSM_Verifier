@@ -1,14 +1,15 @@
-# src/fsm_handler.py
-
 import sys
 import json
+import os
 from lark import Lark, UnexpectedInput
 
-# Load the FSM grammar from external file
-with open("src/fsm.lark") as f:
+# Load the FSM grammar from external file reliably
+script_dir = os.path.dirname(__file__)
+grammar_path = os.path.join(script_dir, 'fsm.lark')
+
+with open(grammar_path) as f:
     grammar = f.read()
 
-# Initialize the parser
 parser = Lark(grammar, parser="lalr", propagate_positions=True)
 
 def syntax_check(input_text):
@@ -21,15 +22,16 @@ def syntax_check(input_text):
             "line": e.line,
             "column": e.column
         }]
+    except Exception as e:
+        return [{
+            "message": f"Unhandled error: {str(e)}",
+            "line": 1,
+            "column": 1
+        }]
 
 def main():
-    # Read input from stdin
     input_text = sys.stdin.read()
-
-    # Run syntax check
     syntax_errors = syntax_check(input_text)
-
-    # Return result to VS Code
     print(json.dumps(syntax_errors))
 
 if __name__ == "__main__":
