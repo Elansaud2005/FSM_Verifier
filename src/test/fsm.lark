@@ -1,0 +1,41 @@
+// src/fsm.lark
+
+start: "{" pair ("," pair)* "}"
+
+pair: id_pair
+    | initial_pair
+    | states_pair
+
+id_pair: "\"id\"" ":" ESCAPED_STRING
+initial_pair: "\"initial\"" ":" ESCAPED_STRING
+states_pair: "\"states\"" ":" "{" (state_entry ("," state_entry)*)? "}"
+
+state_entry: ESCAPED_STRING ":" state_body
+
+state_body: "{" (state_field ("," state_field)*)? "}"
+state_field: entry_field
+           | exit_field
+           | on_field
+           | meta_field
+
+entry_field: "\"entry\"" ":" array
+exit_field: "\"exit\"" ":" array
+meta_field: "\"meta\"" ":" object
+on_field: "\"on\"" ":" object
+
+array: "[" (value ("," value)*)? "]"
+object: "{" (pair_json ("," pair_json)*)? "}"
+pair_json: ESCAPED_STRING ":" value
+
+value: ESCAPED_STRING
+     | SIGNED_NUMBER
+     | object
+     | array
+     | "true"
+     | "false"
+     | "null"
+
+%import common.ESCAPED_STRING
+%import common.SIGNED_NUMBER
+%import common.WS
+%ignore WS
