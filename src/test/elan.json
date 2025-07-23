@@ -1,7 +1,19 @@
 {
-  "states": {
+  "id": "dns_probe",
+  "initial": "start",
+  "": {
     "start": {
-      "type": "start"
-    
+      "entry": [
+        {"type": "send", "packet": "dns_query"}
+      ],
+      "on": {
+        "dns_response": "done"
+      }
+    },
+    "done": {
+      "meta": {
+        "result": "success"
+      }
+    }
   }
 }
