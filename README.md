@@ -1,71 +1,152 @@
-# thursday-extention README
+##1. Introduction
+LiLiNo (Lightweight Linter for NoPASARAN) is a Visual Studio Code extension developed to validate Finite State Machine (FSM) definitions in JSON format for the NoPASARAN network testing platform.
+The extension enforces FSM grammar compliance, assists in error detection, and streamlines the development process for NoPASARAN test configurations.
 
-This is the README for your extension "thursday-extention". After writing up a brief description, we recommend including the following sections.
+This project was implemented as part of an internship program to improve the reliability and efficiency of FSM authoring within NoPASARAN.
 
-## Features
+##2. Features
+2.1 Real-Time Syntax Validation
+Validates FSM JSON definitions as the user types.
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+Enforces structure and syntax rules defined in a .lark grammar file.
 
-For example if there is an image subfolder under your extension project workspace:
+Displays error messages with precise line and column positions.
 
-\!\[feature X\]\(images/feature-x.png\)
+2.2 Grammar-Based Parsing
+Uses the Lark Parser to apply formal grammar rules.
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+Ensures FSM definitions conform to NoPASARAN specifications.
 
-## Requirements
+2.3 Autocompletion Support
+Provides IntelliSense suggestions for FSM keywords and structure.
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+Current implementation uses hardcoded suggestions (dynamic extraction planned).
 
-## Extension Settings
+2.4 Extensible Architecture
+Designed to support semantic validation, multiple-error detection, and advanced rule enforcement in future iterations.
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+##3. System Requirements
+Visual Studio Code (latest stable release)
 
-For example:
+Node.js v16 or later
 
-This extension contributes the following settings:
+Python 3.8 or later
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+Lark Parser Python package:
 
-## Known Issues
+bash
+Copy
+Edit
+pip install lark
+4. Project Structure
+bash
+Copy
+Edit
+lilino/
+├── src/
+│   └── extension.ts          # Main VS Code extension logic
+├── test/
+│   ├── fsm_handler.py        # FSM syntax validation script (Lark parser)
+│   ├── suggest.py            # Autocompletion suggestions generator
+│   └── fsm.lark              # FSM grammar definition
+├── package.json              # Extension metadata & configuration
+└── README.md                 # Project documentation
+5. Installation
+5.1 Development Setup
+Clone the repository:
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+bash
+Copy
+Edit
+git clone https://github.com/your-username/lilino.git
+cd lilino
+Open the project in Visual Studio Code:
 
-## Release Notes
+bash
+Copy
+Edit
+code .
+Press F5 to launch the extension in a new Extension Development Host window.
 
-Users appreciate release notes as you update your extension.
+6. Usage
+Open a .json file containing a NoPASARAN FSM definition.
 
-### 1.0.0
+The extension will:
 
-Initial release of ...
+Validate the file against the FSM grammar.
 
-### 1.0.1
+Highlight syntax errors in real time.
 
-Fixed issue #.
+Provide autocompletion suggestions.
 
-### 1.1.0
+Errors are displayed both inline and in the Problems Panel.
 
-Added features X, Y, and Z.
+7. Internal Workflow
+File Event Handling
 
----
+The extension monitors file open and change events in VS Code.
 
-## Following extension guidelines
+Syntax Validation (fsm_handler.py)
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+Receives the JSON content from TypeScript via stdin.
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+Parses the content using Lark and returns structured error diagnostics.
 
-## Working with Markdown
+Autocompletion (suggest.py)
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
+Supplies a set of FSM keywords for IntelliSense suggestions.
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+Currently hardcoded; dynamic grammar extraction is a planned enhancement.
 
-## For more information
+Grammar (fsm.lark)
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+Defines the formal structure and allowed fields for FSM definitions.
 
-**Enjoy!**
+Serves as the single source of truth for syntax validation.
+
+8. Example
+Valid FSM:
+
+json
+Copy
+Edit
+{
+  "id": "MAIN",
+  "initial": "START",
+  "states": {
+    "START": {
+      "on": {
+        "NEXT": "MIDDLE"
+      }
+    },
+    "MIDDLE": {
+      "type": "final"
+    }
+  }
+}
+Invalid FSM (missing initial):
+
+json
+Copy
+Edit
+{
+  "id": "MAIN",
+  "states": {
+    "START": {
+      "on": {
+        "NEXT": "MIDDLE"
+      }
+    }
+  }
+}
+In the second example, LiLiNo flags the missing "initial" property and highlights the error location.
+
+9. Roadmap
+Dynamic Autocompletion: Extract suggestions directly from fsm.lark.
+
+Multiple-Error Detection: Return all syntax errors in a single parse.
+
+Semantic Validation: Ensure FSM logic correctness beyond syntax.
+
+10. License
+This project is licensed under the MIT License. You are free to use, modify, and distribute it with attribution.
