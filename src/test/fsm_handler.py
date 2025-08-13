@@ -48,8 +48,6 @@ def multi_error_syntax_check(text, max_errors=1):
                 "message": message
             })
 
-        
-
     return errors
 
 # Entry Point
