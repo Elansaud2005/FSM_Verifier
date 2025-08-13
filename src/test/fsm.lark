@@ -1,32 +1,62 @@
-// src/fsm.lark
+// root of the fsm definition
+start: "{" id_pair "," initial_pair "," states_pair "}"
 
-start: "{" pair ("," pair)* "}"
+// required keys in the root
+id_pair: "\"id\"" ":" ESCAPED_STRING            // id of the fsm
+initial_pair: "\"initial\"" ":" ESCAPED_STRING  // starting state
+states_pair: "\"states\"" ":" "{" state_entry ("," state_entry)* "}"  // map of states
 
-pair: id_pair
-    | initial_pair
-    | states_pair
+// state entries inside "states"
+state_entry: ESCAPED_STRING ":" state_body      // state name : state body
+state_body: "{" state_field ("," state_field)* "}"  // fields in each state
 
-id_pair: "\"id\"" ":" ESCAPED_STRING
-initial_pair: "\"initial\"" ":" ESCAPED_STRING
-states_pair: "\"states\"" ":" "{" (state_entry ("," state_entry)*)? "}"
-
-state_entry: ESCAPED_STRING ":" state_body
-
-state_body: "{" (state_field ("," state_field)*)? "}"
+// allowed fields in a state
 state_field: entry_field
            | exit_field
            | on_field
            | meta_field
+           | type_field
 
-entry_field: "\"entry\"" ":" array
-exit_field: "\"exit\"" ":" array
-meta_field: "\"meta\"" ":" object
-on_field: "\"on\"" ":" object
+entry_field: "\"entry\"" ":" (array | object)   // things to run on enter
+exit_field: "\"exit\"" ":" (array | object)     // things to run on exit
+on_field: "\"on\"" ":" transitions_map          // event triggers and transitions
+meta_field: "\"meta\"" ":" object               // optional metadata
+type_field: "\"type\"" ":" ESCAPED_STRING       // like "done"
 
-array: "[" (value ("," value)*)? "]"
-object: "{" (pair_json ("," pair_json)*)? "}"
+// map of event names to transitions
+transitions_map: "{" transition_entry ("," transition_entry)* "}"
+transition_entry: ESCAPED_STRING ":" (transition_list | transition_object)
+
+// list of transition actions
+transition_list: "[" transition_object ("," transition_object)* "]"
+
+// transition object fields
+transition_object: "{" transition_field ("," transition_field)* "}"
+transition_field: guard_field
+                | target_field
+                | internal_field
+                | actions_field
+                | meta_field
+
+guard_field: "\"guard\"" ":" object             // condition to match
+target_field: "\"target\"" ":" ESCAPED_STRING   // destination state
+internal_field: "\"internal\"" ":" "true"       // skip exit/entry
+actions_field: "\"actions\"" ":" "[" action_object ("," action_object)* "]"
+
+// each action in the list
+action_object: "{" action_field ("," action_field)* "}"
+action_field: "\"type\"" ":" ESCAPED_STRING       // required
+            | "\"cond\"" ":" ESCAPED_STRING
+            | "\"target\"" ":" ESCAPED_STRING
+            | "\"internal\"" ":" "true"
+            | pair_json                            // any extra key/value
+
+// generic json structures
+array: "[" [value ("," value)*] "]"
+object: "{" [pair_json ("," pair_json)*] "}"
 pair_json: ESCAPED_STRING ":" value
 
+// json values allowed
 value: ESCAPED_STRING
      | SIGNED_NUMBER
      | object
@@ -35,6 +65,7 @@ value: ESCAPED_STRING
      | "false"
      | "null"
 
+// tokens and whitespace rules
 %import common.ESCAPED_STRING
 %import common.SIGNED_NUMBER
 %import common.WS

@@ -1,46 +1,67 @@
+# fsm_handler.py – multi-error FSM validator using Lark only (no json.loads)
+
 import sys
 import json
 import os
-from lark import Lark, UnexpectedInput  # import Lark for parsing
+from lark import Lark, UnexpectedInput  # import parser and error class
 
-# define the path to the grammar file (fsm.lark)
-script_dir = os.path.dirname(__file__)  # get the current script directory
-grammar_path = os.path.join(script_dir, 'fsm.lark')  # build full path to the grammar file
+# get directory where this script is located
+script_dir = os.path.dirname(__file__)
 
-# read the grammar file content
+# path to the grammar 
 with open(grammar_path) as f:
     grammar = f.read()
 
-# create the parser using Lark and enable position tracking for error reporting
+# create Lark parser (LALR + track positions)
 parser = Lark(grammar, parser="lalr", propagate_positions=True)
+# helper to get line/column from offset
+def get_line_column_from_offset(text, offset):
+    lines = text[:offset].splitlines()
+    line = len(lines)
+    column = len(lines[-1]) + 1 if lines else 1
+    return line, column
 
-# function to check syntax of fsm json input
-def syntax_check(input_text):
-    try:
-        parser.parse(input_text)  # try to parse the input
-        return []  # return empty list if no syntax errors
+def multi_error_syntax_check(text, max_errors=1):
+    errors = []
+    offset = 0
+    remaining = text
 
-    except UnexpectedInput as e:
-        # return the position and error message if a syntax error occurs
-        return [{
-            "offset": e.pos_in_stream,
-            "message": str(e)
-        }]
+    while len(errors)<  max_errors:
+        try:
+            parser.parse(remaining)
+            break
+        except UnexpectedInput as e:
+            error_offset = offset + e.pos_in_stream
 
-    except Exception as e:
-        # return fallback message for any other error
-        return [{
-            "message": f"unhandled error: {str(e)}",
-            "offset": 0  # fallback offset
-        }]
+            token_type = getattr(e.token, 'type', 'UNKNOWN')
+            token_value = getattr(e.token, 'value', 'UNKNOWN')
+            message = f"Unexpected token: {token_value} (type: {token_type})"
 
-# main function: reads input from stdin and prints any syntax errors in json format
-# this function is triggered by the vscode extension
-def main():
-    input_text = sys.stdin.read()  # read the input sent from the extension
-    syntax_errors = syntax_check(input_text)  # check for syntax issues
-    print(json.dumps(syntax_errors))  # send the result back as json
+            # get correct line/column from full text, not the remaining
+            line, column = get_line_column_from_offset(text, error_offset)
 
-# run main only if this file is executed directly
+            errors.append({
+                "offset": error_offset,
+                "line": line,
+                "column": column,
+                "end_column": column + len(token_value),
+                "message": message
+            })
+
+        
+
+    return errors
+
+# Entry Point
 if __name__ == "__main__":
-    main()
+    try:
+        input_text = sys.stdin.read()
+        errors = multi_error_syntax_check(input_text)
+        print(json.dumps(errors))
+    except Exception as e:
+        print(json.dumps([{
+            "offset": 0,
+            "line": 1,
+            "column": 1,
+            "message": f"Unexpected failure: {str(e)}"
+        }]))
