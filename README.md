@@ -15,7 +15,7 @@ This project was implemented as part of an internship program to improve the rel
 - Displays error messages and underlines the issues using the diagnostic API.
 
 ### 2.2 Grammar-Based Parsing
-- Uses the [Lark Parser](https://github.com/lark-parser/lark) to apply formal grammar rules.  
+- Uses the [Lark Parser] to apply formal grammar rules.  
 - Ensures FSM definitions conform to NoPASARAN specifications.
 
 ### 2.3 Autocompletion Support
@@ -37,37 +37,31 @@ pip install lark
 
 ```
 ### 4. Project Structure
-bash
-Copy
-Edit
+```bash
 lilino/
 ├── src/
-│   └── extension.ts          # Main VS Code extension logic
-├── test/
-│   ├── fsm_handler.py        # FSM syntax validation script (Lark parser)
+│  └──  test/
+    ├──extension.ts
+│   ├──fsm_handler.py        # FSM syntax validation script (Lark parser)
 │   ├── suggest.py            # Autocompletion suggestions generator
 │   └── fsm.lark              # FSM grammar definition
 ├── package.json              # Extension metadata & configuration
 └── README.md                 # Project documentation
-
+```
 ## 5. Installation
 5.1 Development Setup
 Clone the repository:
 
 ```bash
-Copy
-Edit
 git clone https://github.com/your-username/lilino.git
 cd lilino
 ```
 Open the project in Visual Studio Code:
 
-```bash
-Copy
-Edit
-code .
-Press F5 to launch the extension in a new Extension Development Host window.
-```
+1. Open the project in VS Code.
+2. Press **F5** or go to **Run → Start Debugging**.
+3. A new VS Code window (Extension Development Host) will open with the extension loaded.
+   
 ## 6. Usage
 Open a .json file containing a NoPASARAN FSM definition.
 
@@ -82,7 +76,6 @@ Provide autocompletion suggestions.
 Errors are displayed both inline and in the Problems Panel.
 
 ## 7. Internal Workflow
-File Event Handling
 
 The extension monitors file open and change events in VS Code.
 
