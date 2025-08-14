@@ -2,7 +2,7 @@
 
 ## 1. Introduction
 LiLiNo (Lightweight Linter for NoPASARAN) is a Visual Studio Code extension developed to validate **Finite State Machine (FSM)** definitions in JSON format for the [NoPASARAN] network testing platform.  
-The extension enforces FSM grammar compliance, assists in error detection, and ease the development process for NoPASARAN test configurations.
+The extension enforces FSM grammar compliance, assists in error detection, and eases the development process for NoPASARAN test configurations.
 
 This project was implemented as part of an internship program to improve the reliability and efficiency of FSM authoring within NoPASARAN.
 
@@ -37,7 +37,7 @@ pip install lark
 
 ```
 ### 4. Project Structure
-```bash
+```
 lilino/
 ├── src/
 │  └──  test/
@@ -53,7 +53,7 @@ lilino/
 Clone the repository:
 
 ```bash
-git clone https://github.com/your-username/lilino.git
+git clone https://github.com/elansaud2005/lilino.git
 cd lilino
 ```
 Open the project in Visual Studio Code:
@@ -63,37 +63,26 @@ Open the project in Visual Studio Code:
 3. A new VS Code window (Extension Development Host) will open with the extension loaded.
    
 ## 6. Usage
-Open a .json file containing a NoPASARAN FSM definition.
+Open a `.json` file containing a NoPASARAN FSM definition.
 
 The extension will:
-
-Validate the file against the FSM grammar.
-
-Highlight syntax errors in real time.
-
-Provide autocompletion suggestions.
-
-Errors are displayed both inline and in the Problems Panel.
-
-## 7. Internal Workflow
-
-The extension monitors file open and change events in VS Code.
-
-Syntax Validation (fsm_handler.py)
-
-Receives the JSON content from TypeScript via stdin.
-
-Parses the content using Lark and returns structured error diagnostics.
-
-Autocompletion (suggest.py)
-
-Supplies a set of FSM keywords uggestions.
-
-Currently hardcoded; dynamic grammar extraction is a planned enhancement.
-
-Grammar (fsm.lark)
-
-Defines the formal structure and allowed fields for FSM definitions.
+- Validate the file against the FSM grammar.  
+- Highlight syntax errors in real time.  
+- Provide basic autocompletion suggestions.  
+- Display errors both inline and in the Problems Panel.  
 
 ---
 
+## 7. Internal Workflow
+The extension continuously monitors file open and change events in VS Code.
+
+- **Syntax Validation (`fsm_handler.py`)**  
+  - Receives the JSON content from the TypeScript frontend via stdin.  
+  - Parses the content using Lark and returns structured error diagnostics.  
+
+- **Autocompletion (`suggest.py`)**  
+  - Supplies a set of FSM keyword suggestions.  
+  - Currently hardcoded; dynamic grammar-based extraction is planned.  
+
+- **Grammar (`fsm.lark`)**  
+  - Defines the formal structure and allowed fields for FSM definitions.  
