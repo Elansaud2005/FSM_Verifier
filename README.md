@@ -73,17 +73,38 @@ The extension will:
 - Display errors both inline and in the Problems Panel.  
 
 ---
-
 ## 7. Internal Workflow
-The extension continuously monitors file open and change events in VS Code.
 
-- **Syntax Validation (`fsm_handler.py`)**  
-  - Receives the JSON content from the TypeScript frontend via stdin.  
-  - Parses the content using Lark and returns structured error diagnostics.  
+the extension works in a simple pipeline whenever a user opens or edits an fsm json file:
 
-- **Autocompletion (`suggest.py`)**  
-  - Supplies a set of FSM keyword suggestions.  
-  - Currently hardcoded; dynamic grammar-based extraction is planned.  
+1. **event detection**  
+   vscode listens for file events (`onDidOpenTextDocument`, `onDidChangeTextDocument`).
 
-- **Grammar (`fsm.lark`)**  
-  - Defines the formal structure and allowed fields for FSM definitions.  
+2. **frontend → backend call**  
+   `extension.ts` sends the entire file content to the python backend using `child_process.spawn`.  
+   - the text is passed through **stdin**.
+
+3. **syntax validation (`fsm_handler.py`)**  
+   - receives the text from stdin.  
+   - parses it with **lark** using the grammar in `fsm.lark`.  
+   - if errors are found, they are captured with exact line/column positions.  
+   - results are formatted as json and written to **stdout**.
+
+4. **frontend error reporting**  
+   - `extension.ts` reads the json results from stdout.  
+   - converts each item into a `vscode.Diagnostic`.  
+   - errors are shown as **red squiggly lines** in the editor and listed in the **problems panel**.
+
+5. **autocompletion (`suggest.py`)**  
+   - when the user types `"`, the extension spawns `suggest.py`.  
+   - the script returns a list of fsm keywords (currently hardcoded).  
+   - these are displayed by vscode’s completion api as inline suggestions.
+
+6. **grammar (`fsm.lark`)**  
+   - defines the allowed structure of fsm definitions.  
+   - ensures validation is consistent and future-proof.  
+   - will also serve as the base for dynamic suggestion extraction in later versions.
+
+**result:**  
+- errors appear instantly when the file changes.  
+- suggestions pop up when writing fsm attributes.  
