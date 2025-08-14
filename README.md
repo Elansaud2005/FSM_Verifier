@@ -40,13 +40,14 @@ pip install lark
 ```
 lilino/
 ├── src/
-│  └──  test/
-    ├──extension.ts
-│   ├──fsm_handler.py        # FSM syntax validation script (Lark parser)
-│   ├── suggest.py            # Autocompletion suggestions generator
-│   └── fsm.lark              # FSM grammar definition
-├── package.json              # Extension metadata & configuration
-└── README.md                 # Project documentation
+│   └── extension.ts
+├── test/
+│   ├── fsm_handler.py
+│   ├── suggest.py
+│   └── fsm.lark
+├── package.json
+└── README.md
+
 ```
 ## 5. Installation
 5.1 Development Setup
